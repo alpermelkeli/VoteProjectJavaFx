@@ -12,8 +12,8 @@ import java.util.concurrent.CompletableFuture;
 
 public class HttpRequest {
 
-    private static final String serverUrl = "https://api.barisyasaman.com/patchVotes"; // Sunucu URL'si
-    private static final String AUTHORIZATION_KEY = "df96a2ac-cd2a-4721-a556-c8adf7b1fc7f"; // Authorization Key
+    private static final String serverUrl = "url"; // Sunucu URL'si
+    private static final String AUTHORIZATION_KEY = "authkey"; // Authorization Key
 
     public static CompletableFuture<Boolean> sendDataToServer(String voteType,String data) {
         return CompletableFuture.supplyAsync(() -> {

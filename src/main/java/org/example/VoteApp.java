@@ -3,17 +3,22 @@ package org.example;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.Background;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.scene.layout.BackgroundFill;
 import javafx.util.Duration;
-
+import javafx.scene.layout.CornerRadii;
+import javafx.scene.paint.Color;
 import java.io.File;
+import javafx.geometry.Insets;
 
 public class VoteApp extends Application {
 
@@ -69,9 +74,19 @@ public class VoteApp extends Application {
                 System.out.println("Lütfen bir dosya seçin, bir seçim türü ve dakika girin.");
             }
         });
+        Button stopButton = new Button("Durdur");
+        stopButton.setOnAction(e -> {
+            voteLogic.stop();
+            countdownTimeline.stop();
+            countdownLabel.setText("Kalan süre: Durduruldu");
 
-        VBox root = new VBox(10, label, chooseFileButton, filePathField, voteTypeComboBox, minuteField, startButton, countdownLabel);
-        Scene scene = new Scene(root, 1280, 720);
+        });
+
+        VBox root = new VBox(10, label, chooseFileButton, filePathField, voteTypeComboBox, minuteField, startButton,stopButton, countdownLabel);
+        root.setAlignment(Pos.CENTER);
+        BackgroundFill backgroundFill = new BackgroundFill(Color.LIGHTBLUE, CornerRadii.EMPTY, Insets.EMPTY);
+        root.setBackground(new Background(backgroundFill));
+        Scene scene = new Scene(root, 400, 400);
 
         primaryStage.setTitle("Seçim Oy Yüklenme Programı");
         primaryStage.setScene(scene);

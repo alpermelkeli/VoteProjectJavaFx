@@ -6,6 +6,7 @@ import java.util.*;
 
 
 public class VoteLogic {
+    private Thread thread;
     private ArrayList<City> cities;
     private ArrayList<City> increasingCities;
     private ArrayList<String> parties;
@@ -25,8 +26,12 @@ public class VoteLogic {
         this.voteIncreaseThread(this.minute);
     }
 
+    public void stop(){
+        thread.stop();
+    }
+
     private void voteIncreaseThread(int minute) {
-        Thread thread = new Thread(() -> {
+        thread = new Thread(() -> {
             try {
                 for(int i = 0; i < 100; ++i) {
                     this.increaseVotes(i + 1);

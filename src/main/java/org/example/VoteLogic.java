@@ -78,33 +78,61 @@ public class VoteLogic {
     private void increaseVotes(int iteration) {
         Random random = new Random();
 
-        for(int i = 0; i < this.cities.size(); ++i) {
+        for (int i = 0; i < this.cities.size(); ++i) {
             City targetCity = (City)this.cities.get(i);
             City currentCity = (City)this.increasingCities.get(i);
             HashMap<String, Long> targetVotes = targetCity.getVotes();
             HashMap<String, Long> currentVotes = currentCity.getVotes();
+
             if (iteration == 100) {
                 currentCity.setVotes(targetVotes);
             } else {
-                Iterator var8 = targetVotes.keySet().iterator();
+                Iterator<String> iterator = targetVotes.keySet().iterator();
 
-                while(var8.hasNext()) {
-                    String party = (String)var8.next();
-                    long targetVote = (Long)targetVotes.get(party);
-                    long currentVote = (Long)currentVotes.get(party);
+                while (iterator.hasNext()) {
+                    String party = iterator.next();
+                    long targetVote = targetVotes.get(party);
+                    long currentVote = currentVotes.get(party);
+
                     if (currentVote < targetVote) {
                         long difference = targetVote - currentVote;
-                        long maxIncrease = difference / (long)(100 - iteration + 1);
-                        long increase = maxIncrease > 0 ? random.nextInt((int) (maxIncrease + 1)) : 0; // int conversion
-                        currentVotes.put(party, currentVote + increase);
+
+                        // Increase complexity by adding more variability
+                        long maxIncrease = difference / (long)(random.nextInt(15) + 5); // Slightly faster increase
+
+                        // Randomly decide if this party gets a bonus increase
+                        if (random.nextDouble() < 0.2) { // 20% chance to get a larger boost
+                            maxIncrease *= 3;
+                        }
+
+                        long increase = maxIncrease > 0 ? random.nextInt((int) (maxIncrease + 1)) : 0;
+
+                        long newVoteCount = currentVote + increase;
+                        currentVotes.put(party, newVoteCount);
                     }
                 }
+
+                // Optional: Normalize votes to prevent exceeding target
+                normalizeVotes(currentVotes, targetVotes);
 
                 currentCity.setVotes(currentVotes);
             }
         }
-
     }
+
+    private void normalizeVotes(HashMap<String, Long> currentVotes, HashMap<String, Long> targetVotes) {
+        for (String party : currentVotes.keySet()) {
+            long currentVote = currentVotes.get(party);
+            long targetVote = targetVotes.get(party);
+
+            // Cap votes at the target to prevent exceeding expected values
+            if (currentVote > targetVote) {
+                currentVotes.put(party, targetVote);
+            }
+        }
+    }
+
+
 
     private void writeProcess() {
         outputString.setLength(0);

@@ -21,21 +21,21 @@ public class VoteLogic {
         this.voteType = voteType;
     }
 
-    public void run() {
-        this.getCities(this.dataPath);
-        this.voteIncreaseThread(this.minute);
+    public void run(boolean sendLive) {
+        getCities(dataPath);
+        voteIncreaseThread(minute, sendLive);
     }
 
     public void stop(){
         thread.stop();
     }
 
-    private void voteIncreaseThread(int minute) {
+    private void voteIncreaseThread(int minute, boolean sendLive) {
         thread = new Thread(() -> {
             try {
                 for(int i = 0; i < 100; ++i) {
-                    this.increaseVotes(i + 1);
-                    this.writeProcess();
+                    increaseVotes(i + 1);
+                    writeProcess(sendLive);
                     Thread.sleep((long)minute * 600L);
                 }
             } catch (Exception var4) {
@@ -134,7 +134,7 @@ public class VoteLogic {
 
 
 
-    private void writeProcess() {
+    private void writeProcess(boolean sendLive) {
         outputString.setLength(0);
         StringBuilder sb1 = new StringBuilder();
         sb1.append("Şehir İsmi\\t");
@@ -144,8 +144,8 @@ public class VoteLogic {
         outputString.append(sb1).append("\\n");
         sb1.setLength(0);
 
-        for(int i = 0; i < this.increasingCities.size(); ++i) {
-            City city = (City)this.increasingCities.get(i);
+        for(int i = 0; i < increasingCities.size(); ++i) {
+            City city = increasingCities.get(i);
             sb1.append(city.getName()).append("\\t");
 
             for(int j = 0; j < this.parties.size(); ++j) {
@@ -161,9 +161,58 @@ public class VoteLogic {
             }
         }
         HttpRequest.sendDataToServer(voteType,outputString.toString()).thenAccept((aBoolean -> {
-            System.out.println(aBoolean);
+
+        }));
+
+        if(sendLive){
+            writeProcessLive();
+        }
+
+
+    }
+    private void writeProcessLive() {
+        StringBuilder percentageOutput = new StringBuilder();
+
+        percentageOutput.append("Şehir İsmi\t");
+        this.parties.forEach(party -> percentageOutput.append(party).append("\t"));
+        percentageOutput.append("\n");
+
+        for (City city : increasingCities) {
+            long totalVotes = city.getVotes().values().stream().mapToLong(Long::longValue).sum();
+            percentageOutput.append(city.getName()).append("\t");
+
+            for (int j = 0; j < this.parties.size(); ++j) {
+                String party = this.parties.get(j);
+                long voteCount = city.getVotes().get(party);
+                double percentage = totalVotes > 0 ? (double) voteCount / totalVotes * 100 : 0;
+
+                // Son sütunda tab eklemeyelim
+                if (j != this.parties.size() - 1) {
+                    percentageOutput.append(String.format("%.2f", percentage)).append("\t");
+                } else {
+                    percentageOutput.append(String.format("%.2f", percentage));
+                }
+            }
+            percentageOutput.append("\n");
+        }
+
+        sendDataToLive(percentageOutput.toString());
+    }
+
+
+
+    private void sendDataToLive(String data) {
+        String jsonData = VoteDataConverter.convertToJSON(data);
+        HttpRequest.sendDataToLive(jsonData).thenAccept((success -> {
+            if (success) {
+                System.out.println("Data successfully sent to live.");
+            } else {
+                System.out.println("Failed to send data to live.");
+            }
         }));
     }
+
+
 }
 
 

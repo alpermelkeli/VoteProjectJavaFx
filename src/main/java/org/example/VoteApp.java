@@ -5,10 +5,7 @@ import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
@@ -28,7 +25,9 @@ public class VoteApp extends Application {
     private TextField minuteField;
     private Label countdownLabel;
     private Timeline countdownTimeline;
+    private CheckBox checkBox;
     private int totalSeconds;
+
 
     @Override
     public void start(Stage primaryStage) {
@@ -55,23 +54,27 @@ public class VoteApp extends Application {
         countdownLabel = new Label("Kalan süre: -");
 
         Button startButton = new Button("Başlat");
+
         startButton.setOnAction(e -> {
-            if (!filePathField.getText().isEmpty() && voteTypeComboBox.getValue() != null && !minuteField.getText().isEmpty()) {
+            if (!filePathField.getText().isEmpty() && voteTypeComboBox.getValue() != null && !minuteField.getText().isEmpty() ) {
+
+
                 String voteType = voteTypeComboBox.getValue();
                 int minutes;
                 try {
                     minutes = Integer.parseInt(minuteField.getText());
                 } catch (NumberFormatException ex) {
-                    System.out.println("Lütfen geçerli bir dakika girin.");
+                    Toast.makeText(primaryStage,"Lütfen geçerli bir dakika girin",Toast.toastDelay,Toast.fadeInDelay,Toast.fadeOutDelay);
                     return;
                 }
 
                 voteLogic = new VoteLogic(filePathField.getText(), minutes, voteType);
-                voteLogic.run();
-
+                voteLogic.run(checkBox.isSelected());
                 startCountdown(minutes);
-            } else {
-                System.out.println("Lütfen bir dosya seçin, bir seçim türü ve dakika girin.");
+
+            }
+            else {
+                Toast.makeText(primaryStage,"Lütfen bir dosya seçin, bir seçim türü ve dakika girin.",Toast.toastDelay,Toast.fadeInDelay,Toast.fadeOutDelay);
             }
         });
         Button stopButton = new Button("Durdur");
@@ -81,11 +84,17 @@ public class VoteApp extends Application {
             countdownLabel.setText("Kalan süre: Durduruldu");
 
         });
+        checkBox = new CheckBox("Verileri yayına gönder");
 
-        VBox root = new VBox(10, label, chooseFileButton, filePathField, voteTypeComboBox, minuteField, startButton,stopButton, countdownLabel);
+        checkBox.setSelected(false);
+
+        VBox root = new VBox(10, label, chooseFileButton, filePathField, voteTypeComboBox, minuteField, startButton,stopButton, countdownLabel, checkBox);
         root.setAlignment(Pos.CENTER);
+
         BackgroundFill backgroundFill = new BackgroundFill(Color.LIGHTBLUE, CornerRadii.EMPTY, Insets.EMPTY);
+
         root.setBackground(new Background(backgroundFill));
+
         Scene scene = new Scene(root, 400, 400);
 
         primaryStage.setTitle("Seçim Oy Yüklenme Programı");

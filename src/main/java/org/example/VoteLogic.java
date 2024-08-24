@@ -33,18 +33,36 @@ public class VoteLogic {
     private void voteIncreaseThread(int minute, boolean sendLive) {
         thread = new Thread(() -> {
             try {
-                for(int i = 0; i < 100; ++i) {
+                int totalIterations = 100;
+                int slowIterations = 5;
+                int fastIterations = totalIterations - slowIterations;
+
+                long totalTimeMillis = (long) minute * 60000L;
+
+
+                long slowSleepTime = (long)(totalTimeMillis * 0.6 / slowIterations);
+
+
+                long fastSleepTime = (long)(totalTimeMillis * 0.4 / fastIterations);
+
+                for (int i = 0; i < totalIterations; ++i) {
                     increaseVotes(i + 1);
                     writeProcess(sendLive);
-                    Thread.sleep((long)minute * 600L);
+
+                    if (i < slowIterations) {
+                        Thread.sleep(slowSleepTime);
+                    } else {
+                        Thread.sleep(fastSleepTime);
+                    }
                 }
-            } catch (Exception var4) {
-                var4.printStackTrace();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
 
         });
         thread.start();
     }
+
 
     private void getCities(String dataPath) {
         ArrayList<City> resultCities = new ArrayList();
